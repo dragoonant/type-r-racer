@@ -123,6 +123,26 @@ All four wheels beyond the kerbs, or using "back to track" (R), voids the lap.
 ### 13. Nothing was committed to git
 **Why:** the owner did not ask for a repository. A `.gitignore` is in place.
 
+### 14. The game is published on GitHub Pages
+Every push to `main` runs the physics checks, builds the site and deploys it.
+**Why:** the owner asked to playtest on the web. A failed check blocks a release.
+
+### 15. Touch controls for phones (2026-11-14)
+A steering pad on the left, brake and gas pedals on the right, and Reset, View
+and Pause buttons at the top. Shift buttons appear with the manual gearbox.
+
+**Why these choices:**
+- **A pad, not tilt steering.** Tilt needs a permission prompt on iPhones and
+  fights the screen rotation. A thumb pad works everywhere.
+- **Analogue, not on/off.** The pad reads how far the thumb is from centre and
+  the pedals read how high they are pressed, so the car can be driven smoothly.
+- **The HUD moves and shrinks** so the map and speed readout are not under the
+  thumbs.
+- **Phones in portrait are asked to turn sideways** and the game pauses until
+  they do. Where the browser allows it, starting a session goes full screen.
+- **Phones default to medium graphics** to keep the frame rate up.
+- There is no handbrake or look-around on touch; neither is needed for a lap.
+
 ## Known gaps in this milestone
 
 - Visuals are clean but simple. They are far from Forza or Gran Turismo.
@@ -131,3 +151,4 @@ All four wheels beyond the kerbs, or using "back to track" (R), voids the lap.
   2:23.1, set by a professional. A good human lap here should beat the autopilot.
 - No FK8, AI opponents, career, setup tuning screen, pit lane, damage or replays.
 - Gamepad support was written to the standard mapping but not tested on hardware.
+- Touch controls were tested with emulated touch only, not on a real phone.

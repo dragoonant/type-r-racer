@@ -9,6 +9,7 @@ import { BRAND } from './config/branding.js';
 import { computeRacingLine } from './game/raceline.js';
 import { Autopilot } from './game/autopilot.js';
 import { Input } from './game/input.js';
+import { TouchControls } from './game/touch.js';
 import { LapTimer, formatTime } from './game/timing.js';
 import { Hud } from './game/hud.js';
 import { GameAudio } from './game/audio.js';
@@ -26,7 +27,8 @@ const SETTINGS_KEY = 'trr.settings.v1';
 const settings = {
   gearbox: 'auto', abs: true, tc: true, line: true, ghost: true,
   units: /^en-(US|GB)/.test(navigator.language || '') ? 'mph' : 'kmh',
-  quality: 'high', camera: 'cockpit',
+  // Phones get the lighter graphics preset unless the player picks another.
+  quality: window.matchMedia && window.matchMedia('(pointer: coarse)').matches ? 'medium' : 'high', camera: 'cockpit',
 };
 try { Object.assign(settings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); } catch { /* defaults */ }
 const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ } };
@@ -163,6 +165,7 @@ async function boot() {
 
   const hud = new Hud(track, spec);
   const input = new Input();
+  const touch = new TouchControls(input);
   const audio = new GameAudio();
   const timer = new LapTimer(track, `trr.best.${trackData.id}.${spec.id}.v1`);
   if (params.has('autopilot')) { timer.persist = false; timer.best = null; } // test runs never touch the saved record
@@ -176,6 +179,29 @@ async function boot() {
   let lastCorner = -1, clock = 0, steerVis = 0;
   const hs = { ghost: null };
   const ghostPose = {};
+
+  // Touch layout: controls only while driving, and phones are asked to turn sideways.
+  let rotatePaused = false;
+  function syncTouch() {
+    const portrait = touch.enabled && window.innerHeight > window.innerWidth && window.innerWidth < 600;
+    if (portrait && state === 'drive') { rotatePaused = true; setPaused(true); return; }
+    if (!portrait && rotatePaused && state === 'pause') { rotatePaused = false; setPaused(false); return; }
+    if (state !== 'pause') rotatePaused = false;
+    $('rotate').hidden = !(portrait && rotatePaused);
+    touch.sync(state === 'drive', settings.gearbox === 'manual');
+  }
+  touch.onChange = syncTouch;
+  window.addEventListener('resize', syncTouch);
+  function goFullscreen() {
+    // On phones, use the whole screen and hold it sideways where the browser allows.
+    const el = document.documentElement;
+    if (!touch.enabled || document.fullscreenElement || !el.requestFullscreen) return;
+    try {
+      el.requestFullscreen({ navigationUI: 'hide' })
+        .then(() => (screen.orientation && screen.orientation.lock ? screen.orientation.lock('landscape') : null))
+        .catch(() => { /* not allowed here; the game still works */ });
+    } catch { /* unsupported */ }
+  }
 
   function placeCar(s, d = 0) {
     car.reset(s, d);
@@ -194,6 +220,7 @@ async function boot() {
     hud.show(!params.has('nohud'));
     audio.init().then(() => audio.setPaused(false));
     hud.toast(trackBrand.name, 'Cross the line to start your first timed lap', 3.5);
+    syncTouch();
   }
   function showMenu() {
     state = 'menu';
@@ -201,12 +228,14 @@ async function boot() {
     $('menu').hidden = false; $('pause').hidden = true;
     hud.show(false);
     audio.setPaused(true);
+    syncTouch();
   }
   function setPaused(p) {
     if (state !== 'drive' && state !== 'pause') return;
     state = p ? 'pause' : 'drive';
     $('pause').hidden = !p;
     audio.setPaused(p);
+    syncTouch();
   }
   function syncMenu() {
     $('o-gearbox').value = settings.gearbox; $('o-abs').checked = settings.abs; $('o-tc').checked = settings.tc;
@@ -216,9 +245,9 @@ async function boot() {
     $('m-start').textContent = demo ? 'Start driving' : 'Back to the car';
   }
   for (const [id, key, kind] of [['o-gearbox', 'gearbox', 'value'], ['o-abs', 'abs', 'checked'], ['o-tc', 'tc', 'checked'], ['o-line', 'line', 'checked'], ['o-ghost', 'ghost', 'checked'], ['o-units', 'units', 'value'], ['o-quality', 'quality', 'value']]) {
-    $(id).addEventListener('change', (e) => { settings[key] = e.target[kind]; saveSettings(); if (key === 'quality') applyQuality(); });
+    $(id).addEventListener('change', (e) => { settings[key] = e.target[kind]; saveSettings(); if (key === 'quality') applyQuality(); syncTouch(); });
   }
-  $('m-start').addEventListener('click', () => { if (demo) startSession(); else { $('menu').hidden = true; hud.show(!params.has('nohud')); setPaused(false); state = 'drive'; audio.setPaused(false); } });
+  $('m-start').addEventListener('click', () => { goFullscreen(); if (demo) startSession(); else { $('menu').hidden = true; hud.show(!params.has('nohud')); state = 'drive'; audio.setPaused(false); syncTouch(); } });
   $('m-clear').addEventListener('click', () => { timer.clearBest(); syncMenu(); });
   $('p-resume').addEventListener('click', () => setPaused(false));
   $('p-restart').addEventListener('click', () => startSession());
@@ -242,7 +271,7 @@ async function boot() {
         hud.toast('Back on track', timer.running ? 'This lap will not count' : '');
         break;
       }
-      case 'transmission': settings.gearbox = settings.gearbox === 'auto' ? 'manual' : 'auto'; saveSettings(); hud.toast(settings.gearbox === 'auto' ? 'Automatic gearbox' : 'Manual gearbox', settings.gearbox === 'manual' ? 'E / Q or B / X to shift' : ''); break;
+      case 'transmission': settings.gearbox = settings.gearbox === 'auto' ? 'manual' : 'auto'; saveSettings(); syncTouch(); hud.toast(settings.gearbox === 'auto' ? 'Automatic gearbox' : 'Manual gearbox', settings.gearbox === 'manual' ? 'E / Q or B / X to shift' : ''); break;
       case 'abs': settings.abs = !settings.abs; saveSettings(); hud.toast('Anti-lock brakes ' + (settings.abs ? 'on' : 'off')); break;
       case 'tc': settings.tc = !settings.tc; saveSettings(); hud.toast('Traction control ' + (settings.tc ? 'on' : 'off')); break;
       case 'units': settings.units = settings.units === 'kmh' ? 'mph' : 'kmh'; saveSettings(); break;
@@ -377,7 +406,7 @@ async function boot() {
   }
 
   // Handles for debugging from the browser console.
-  window.__game = { car, track, line, timer, rig, settings, scene, camera, renderer, model, world, input, audio, hud, autopilot, startSession, placeCar, get fps() { return fps; }, get state() { return state; },
+  window.__game = { car, track, line, timer, rig, settings, scene, camera, renderer, model, world, input, touch, audio, hud, autopilot, startSession, placeCar, get fps() { return fps; }, get state() { return state; },
     /** Advance and draw one frame by hand (used by automated checks when the tab is not animating). */
     tick(dt = 1 / 60) { if (state !== 'pause') step(dt); renderer.render(scene, camera); } };
   requestAnimationFrame(frame);

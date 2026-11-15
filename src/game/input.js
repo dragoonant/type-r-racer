@@ -1,4 +1,4 @@
-// Keyboard and gamepad input, reduced to one set of driving controls.
+// Keyboard, gamepad and touch input, reduced to one set of driving controls.
 //
 // Analogue values are filtered here so the physics always sees smooth inputs:
 // keys ramp instead of snapping, and the stick gets a dead zone and a curve.
@@ -25,6 +25,8 @@ export class Input {
     this.padButtons = [];
     this.padIndex = -1;
     this.lastRumble = 0;
+    // Raw values written by the on-screen controls (see touch.js).
+    this.touch = { steer: 0, throttle: 0, brake: 0, steering: false };
 
     window.addEventListener('keydown', (e) => {
       if (e.repeat) { if (this._driving(e.code)) e.preventDefault(); return; }
@@ -81,6 +83,15 @@ export class Input {
       this.brake += (padBrk - this.brake) * Math.min(1, dt / 0.03);
       this.handbrake = padHand;
       this.lookX = padLook; this.lookBack = padBack;
+    } else if (this.device === 'touch') {
+      const t = this.touch;
+      // A gentle curve gives finer control near the centre of the pad.
+      const target = Math.sign(t.steer) * Math.pow(Math.abs(t.steer), 1.35);
+      const rate = t.steering ? 7 : 5;
+      this.steer += clamp(target - this.steer, -rate * dt, rate * dt);
+      this.throttle += clamp(t.throttle - this.throttle, -8 * dt, 5 * dt);
+      this.brake += clamp(t.brake - this.brake, -9 * dt, 6 * dt);
+      this.handbrake = 0; this.lookX = 0; this.lookBack = false;
     } else {
       const left = this.down('ArrowLeft', 'KeyA'), right = this.down('ArrowRight', 'KeyD');
       const target = (right ? 1 : 0) - (left ? 1 : 0);

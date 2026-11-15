@@ -20,8 +20,8 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:5183 in a desktop browser. Chrome or Edge is
-recommended for gamepad vibration.
+Then open http://localhost:5183. Chrome or Edge on a desktop is recommended
+for gamepad vibration.
 
 Other commands:
 
@@ -45,6 +45,10 @@ Other commands:
 | Look left / right | , . | Right stick |
 | Back to track | R | View |
 | Pause | Esc | Menu |
+
+On a phone or tablet the game shows touch controls: a steering pad under the
+left thumb, brake and gas pedals under the right, and Reset, View and Pause
+buttons at the top right. Hold the phone sideways.
 
 In play: M gearbox, B anti-lock brakes, T traction control, L driving line,
 G ghost, U units.

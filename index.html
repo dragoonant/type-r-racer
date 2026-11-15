@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0a0b0d" />
   <title>Type R Racer</title>
   <link rel="stylesheet" href="./src/style.css" />
 </head>
@@ -34,6 +36,27 @@
         </div>
       </div>
       <div id="aids"><span id="a-gearbox">AUTO</span><span id="a-abs">ABS</span><span id="a-tc">TC</span><span id="a-cam">Cockpit</span></div>
+    </div>
+  </div>
+
+  <div id="touch" hidden>
+    <div id="tc-top">
+      <button data-act="reset" aria-label="Back to track">Reset</button>
+      <button data-act="camera" aria-label="Change view">View</button>
+      <button data-act="pause" aria-label="Pause"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="3" y="2" width="4" height="12" fill="currentColor" /><rect x="9" y="2" width="4" height="12" fill="currentColor" /></svg></button>
+    </div>
+    <div id="tc-shift" hidden>
+      <button data-act="shiftDown" aria-label="Shift down">&minus;</button>
+      <button data-act="shiftUp" aria-label="Shift up">+</button>
+    </div>
+    <div id="tc-steer" aria-label="Steering pad">
+      <svg class="chev l" viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M10 2 4 8l6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      <svg class="chev r" viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M6 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      <div id="tc-knob"></div>
+    </div>
+    <div id="tc-pedals">
+      <div id="tc-brake" class="tc-pedal" aria-label="Brake"><div class="fill"></div><span>Brake</span></div>
+      <div id="tc-throttle" class="tc-pedal" aria-label="Throttle"><div class="fill"></div><span>Gas</span></div>
     </div>
   </div>
 
@@ -70,7 +93,16 @@
             <tr><td>Back to track</td><td>R</td><td>View</td></tr>
             <tr><td>Pause</td><td>Esc</td><td>Menu</td></tr>
           </table>
-          <p class="hint">In play: M gearbox, B ABS, T traction control, L driving line, G ghost, U units.</p>
+          <div id="touch-help">
+            <ul class="tips">
+              <li><b>Steer:</b> slide your left thumb along the pad.</li>
+              <li><b>Gas and brake:</b> right thumb. Press higher up a pedal for more.</li>
+              <li><b>Reset, View, Pause:</b> top right of the screen.</li>
+              <li><b>Manual gearbox:</b> + and &minus; buttons appear above the steering pad.</li>
+            </ul>
+            <p class="hint">Hold the phone sideways. A keyboard or gamepad still works if one is connected.</p>
+          </div>
+          <p class="hint" id="key-hint">In play: M gearbox, B ABS, T traction control, L driving line, G ghost, U units.</p>
         </div>
       </div>
       <button class="go" id="m-start">Start driving</button>
@@ -85,6 +117,10 @@
       <button class="go alt" id="p-restart">Restart session</button>
       <button class="go alt" id="p-menu">Settings and controls</button>
     </div>
+  </div>
+
+  <div class="overlay" id="rotate" hidden>
+    <div class="card"><h1>Turn your phone</h1><p class="sub">Hold it sideways to drive. The game carries on by itself.</p></div>
   </div>
 
   <script type="module" src="./src/main.js"></script>
