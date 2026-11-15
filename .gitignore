@@ -1,0 +1,7 @@
+node_modules/
+dist/
+tools/raw/dem/
+tools/raw/*.svg
+.claude/
+reference/interior/*
+!reference/interior/README.md

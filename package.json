@@ -1,0 +1,21 @@
+{
+  "name": "type-r-racer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A browser driving simulator built around the Civic Type R.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node tools/sim-test.mjs",
+    "track:fetch": "node tools/fetch-track.mjs",
+    "track:build": "node tools/build-track.mjs"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^6.4.6"
+  }
+}

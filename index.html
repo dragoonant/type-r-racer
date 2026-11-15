@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Type R Racer</title>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <canvas id="view"></canvas>
+
+  <div id="hud" hidden>
+    <div class="panel" id="timing">
+      <div class="row big"><span class="label">Lap</span><span id="t-current">-:--.---</span><span id="t-flag"></span></div>
+      <div class="row"><span class="label">Delta</span><span id="t-delta">&nbsp;</span></div>
+      <div class="row"><span class="label">Last</span><span id="t-last">-:--.---</span></div>
+      <div class="row"><span class="label">Best</span><span id="t-best">-:--.---</span></div>
+      <div class="row sectors"><span class="sec" id="s-0">S1</span><span class="sec" id="s-1">S2</span><span class="sec" id="s-2">S3</span></div>
+    </div>
+
+    <div id="corner"></div>
+    <div id="toast"></div>
+
+    <canvas id="minimap" width="220" height="220"></canvas>
+
+    <div class="panel" id="dash">
+      <div id="revbar"><div id="revfill"></div><div id="revred"></div></div>
+      <div id="dashrow">
+        <div id="gear">N</div>
+        <div id="speedbox"><span id="speed">0</span><span id="unit">km/h</span></div>
+        <div id="pedals">
+          <div class="pedal"><div id="p-brake"></div></div>
+          <div class="pedal"><div id="p-throttle"></div></div>
+        </div>
+      </div>
+      <div id="aids"><span id="a-gearbox">AUTO</span><span id="a-abs">ABS</span><span id="a-tc">TC</span><span id="a-cam">Cockpit</span></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="loading"><div class="card"><h1 id="load-title">Type R Racer</h1><p id="load-text">Building the circuit…</p></div></div>
+
+  <div class="overlay" id="menu" hidden>
+    <div class="card wide">
+      <p class="kicker" id="m-kicker">Time Trial</p>
+      <h1 id="m-title">Type R Racer</h1>
+      <p class="sub" id="m-sub"></p>
+      <div class="cols">
+        <div>
+          <h2>Settings</h2>
+          <label class="opt"><span>Gearbox</span><select id="o-gearbox"><option value="auto">Automatic</option><option value="manual">Manual (sequential shift)</option></select></label>
+          <label class="opt"><span>Anti-lock brakes</span><input type="checkbox" id="o-abs" checked /></label>
+          <label class="opt"><span>Traction control</span><input type="checkbox" id="o-tc" checked /></label>
+          <label class="opt"><span>Driving line</span><input type="checkbox" id="o-line" checked /></label>
+          <label class="opt"><span>Ghost of best lap</span><input type="checkbox" id="o-ghost" checked /></label>
+          <label class="opt"><span>Speed units</span><select id="o-units"><option value="kmh">km/h</option><option value="mph">mph</option></select></label>
+          <label class="opt"><span>Graphics</span><select id="o-quality"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
+          <p class="record">Best lap: <b id="m-best">none yet</b> <button class="link" id="m-clear" hidden>clear</button></p>
+        </div>
+        <div>
+          <h2>Controls</h2>
+          <table class="keys">
+            <tr><th></th><th>Keyboard</th><th>Gamepad</th></tr>
+            <tr><td>Steer</td><td>A D or ← →</td><td>Left stick</td></tr>
+            <tr><td>Throttle / brake</td><td>W S or ↑ ↓</td><td>RT / LT</td></tr>
+            <tr><td>Handbrake</td><td>Space</td><td>A</td></tr>
+            <tr><td>Shift up / down</td><td>E / Q</td><td>B / X</td></tr>
+            <tr><td>Camera</td><td>C</td><td>RB</td></tr>
+            <tr><td>Look back</td><td>V</td><td>Y</td></tr>
+            <tr><td>Look left / right</td><td>, .</td><td>Right stick</td></tr>
+            <tr><td>Back to track</td><td>R</td><td>View</td></tr>
+            <tr><td>Pause</td><td>Esc</td><td>Menu</td></tr>
+          </table>
+          <p class="hint">In play: M gearbox, B ABS, T traction control, L driving line, G ghost, U units.</p>
+        </div>
+      </div>
+      <button class="go" id="m-start">Start driving</button>
+      <p class="credits" id="m-credits"></p>
+    </div>
+  </div>
+
+  <div class="overlay" id="pause" hidden>
+    <div class="card">
+      <h1>Paused</h1>
+      <button class="go" id="p-resume">Resume</button>
+      <button class="go alt" id="p-restart">Restart session</button>
+      <button class="go alt" id="p-menu">Settings and controls</button>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
